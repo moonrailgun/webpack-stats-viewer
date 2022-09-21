@@ -7,6 +7,7 @@ import {
   Popover,
   Button,
   Space,
+  Typography,
 } from '@arco-design/web-react';
 import type { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { IconSearch } from '@arco-design/web-react/icon';
@@ -164,6 +165,18 @@ export const Reportor: React.FC<{
         title: 'entry',
         dataIndex: 'entry',
         width: 80,
+      },
+      {
+        title: 'reason',
+        dataIndex: 'reason',
+        width: 380,
+        render: (col) => (
+          <Typography.Paragraph
+            ellipsis={{ rows: 1, showTooltip: true, wrapper: 'span' }}
+          >
+            {col}
+          </Typography.Paragraph>
+        ),
       },
       {
         title: 'size',
