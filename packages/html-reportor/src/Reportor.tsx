@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { StatsCompilation, StatsChunk } from 'webpack';
+import type { StatsCompilation, StatsChunk, StatsModule } from 'webpack';
 import {
   Table,
   TableColumnProps,
@@ -13,6 +13,7 @@ import { IconSearch } from '@arco-design/web-react/icon';
 import { get, groupBy, includes } from 'lodash-es';
 import filesize from 'filesize';
 import { useMemoizedFn } from 'ahooks';
+import Highlighter from 'react-highlight-words';
 import './Reportor.less';
 
 export const Reportor: React.FC<{
@@ -32,7 +33,7 @@ export const Reportor: React.FC<{
             key={item}
             size="mini"
             type="text"
-            onClick={() => setFiltered({ ...filtered, id: [String(item)] })}
+            onClick={() => setFiltered({ id: [String(item)] })}
           >
             {item}
           </Button>
@@ -98,16 +99,20 @@ export const Reportor: React.FC<{
       {
         title: 'origins',
         dataIndex: 'origins',
-        width: 80,
+        width: 120,
         filteredValue: filtered['origins'],
         render: (col: StatsChunk['origins']) => {
           return (
             <Popover
               trigger={['click']}
               style={{ maxWidth: '80vw' }}
-              content={(col ?? []).map((item) => (
-                <div key={item.moduleId} className="whitespace-nowrap">
-                  {item.moduleName}:{item.loc}({item.request})
+              content={(col ?? []).map((item, i) => (
+                <div key={i} className="whitespace-nowrap">
+                  <Highlighter
+                    searchWords={filtered['origins'] ?? []}
+                    autoEscape={true}
+                    textToHighlight={`${item.moduleName}:${item.loc}(${item.request})`}
+                  />
                 </div>
               ))}
             >
@@ -124,26 +129,33 @@ export const Reportor: React.FC<{
       {
         title: 'modules',
         dataIndex: 'modules',
-        width: 80,
+        width: 120,
         filteredValue: filtered['modules'],
         render: (col: StatsChunk['modules']) => {
           return (
             <Popover
               trigger={['click']}
               style={{ maxWidth: '80vw' }}
-              content={(col ?? []).map((item) => (
-                <div key={item.id} className="whitespace-nowrap">
-                  {get(item, 'name')}:{get(item, 'loc')}(
-                  {filesize(item.size ?? 0)})
-                </div>
-              ))}
+              content={getAllModules(col ?? []).map((item, i) => {
+                return (
+                  <div key={i} className="whitespace-nowrap">
+                    <Highlighter
+                      searchWords={filtered['modules'] ?? []}
+                      autoEscape={true}
+                      textToHighlight={`${item.name}(${filesize(
+                        item.size ?? 0
+                      )})`}
+                    />
+                  </div>
+                );
+              })}
             >
               <Button type="text">(Click)</Button>
             </Popover>
           );
         },
         ...buildSearchFilter(inputRef, (chunk, val) => {
-          return (chunk.modules ?? []).some((item) =>
+          return getAllModules(chunk.modules ?? []).some((item) =>
             String(item.name).includes(val)
           );
         }),
@@ -187,8 +199,8 @@ export const Reportor: React.FC<{
           sizeCanChange: true,
           onPageSizeChange: (size) => setPageSize(size),
         }}
+        scroll={{ x: true }}
         onChange={(pagination, sorter, filters, extra) => {
-          console.log(pagination, sorter, filters, extra);
           if (extra.action === 'filter') {
             setFiltered(filters);
           }
@@ -245,4 +257,20 @@ function buildSearchFilter(
       }
     },
   };
+}
+
+/**
+ * Expand all modules
+ */
+function getAllModules(modules: StatsModule[]): StatsModule[] {
+  const list: StatsModule[] = [];
+  modules.forEach((module) => {
+    if (module.modules) {
+      list.push(...module.modules);
+    } else {
+      list.push(module);
+    }
+  });
+
+  return list;
 }
