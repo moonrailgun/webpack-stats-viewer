@@ -20,7 +20,9 @@ export const Reportor: React.FC<{
 }> = React.memo((props) => {
   const inputRef = useRef<RefInputType>(null);
   const [pageSize, setPageSize] = useState(20);
-  const [filteredId, setFilteredId] = useState<string[] | null>(null);
+  const [filtered, setFiltered] = useState<Partial<Record<string, string[]>>>(
+    {}
+  );
 
   const renderModuleIds = useMemoizedFn((col: (string | number)[]) => {
     return (
@@ -30,7 +32,7 @@ export const Reportor: React.FC<{
             key={item}
             size="mini"
             type="text"
-            onClick={() => setFilteredId([String(item)])}
+            onClick={() => setFiltered({ ...filtered, id: [String(item)] })}
           >
             {item}
           </Button>
@@ -46,7 +48,7 @@ export const Reportor: React.FC<{
         dataIndex: 'id',
         width: 100,
         fixed: 'left',
-        filteredValue: filteredId,
+        filteredValue: filtered['id'],
         ...buildSearchFilter(inputRef, 'id'),
       },
       {
@@ -97,6 +99,7 @@ export const Reportor: React.FC<{
         title: 'origins',
         dataIndex: 'origins',
         width: 80,
+        filteredValue: filtered['origins'],
         render: (col: StatsChunk['origins']) => {
           return (
             <Popover
@@ -122,6 +125,7 @@ export const Reportor: React.FC<{
         title: 'modules',
         dataIndex: 'modules',
         width: 80,
+        filteredValue: filtered['modules'],
         render: (col: StatsChunk['modules']) => {
           return (
             <Popover
@@ -157,7 +161,7 @@ export const Reportor: React.FC<{
         render: (col) => filesize(col),
       },
     ] as TableColumnProps<StatsChunk>[];
-  }, [filteredId]);
+  }, [filtered]);
 
   const data = useMemo<StatsChunk[]>(
     () => Array.from(props.stats.chunks ?? []),
@@ -184,13 +188,9 @@ export const Reportor: React.FC<{
           onPageSizeChange: (size) => setPageSize(size),
         }}
         onChange={(pagination, sorter, filters, extra) => {
+          console.log(pagination, sorter, filters, extra);
           if (extra.action === 'filter') {
-            if (filters['id']) {
-              setFilteredId(filters['id']);
-            } else {
-              setFilteredId([]);
-            }
-            console.log('filters', filters);
+            setFiltered(filters);
           }
         }}
       />
