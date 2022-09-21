@@ -43,7 +43,7 @@ export function App() {
           <div className="text-lg p-4">Upload your stats.json file</div>
           <Button
             className="mb-4"
-            type="primary"
+            type="text"
             href="https://webpack.js.org/api/stats/"
             target="_blank"
           >

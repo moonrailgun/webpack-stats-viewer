@@ -66,6 +66,13 @@ export const Reportor: React.FC<{
         render: renderArray,
       },
       {
+        title: 'size',
+        dataIndex: 'size',
+        sorter: (a, b) => a.size - b.size,
+        width: 100,
+        render: (col) => filesize(col),
+      },
+      {
         title: 'parents',
         dataIndex: 'parents',
         width: 240,
@@ -178,13 +185,6 @@ export const Reportor: React.FC<{
           </Typography.Paragraph>
         ),
       },
-      {
-        title: 'size',
-        dataIndex: 'size',
-        sorter: (a, b) => a.size - b.size,
-        width: 100,
-        render: (col) => filesize(col),
-      },
     ] as TableColumnProps<StatsChunk>[];
   }, [filtered]);
 
@@ -251,6 +251,9 @@ function buildSearchFilter(
               setFilterKeys?.(value ? [value] : []);
             }}
             onSearch={() => {
+              confirm?.();
+            }}
+            onBlur={() => {
               confirm?.();
             }}
           />
