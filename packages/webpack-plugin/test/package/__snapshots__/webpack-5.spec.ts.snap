@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`webpack plugin package webpack5 1`] = `
+[
+  {
+    "auxiliaryChunkIdHints": [],
+    "auxiliaryChunkNames": [],
+    "auxiliaryChunks": [],
+    "cached": false,
+    "chunkIdHints": [],
+    "chunkNames": [
+      "main",
+    ],
+    "chunks": [
+      179,
+    ],
+    "comparedForEmit": false,
+    "emitted": true,
+    "filteredRelated": undefined,
+    "info": {
+      "javascriptModule": false,
+      "minimized": true,
+      "size": 0,
+    },
+    "isOverSizeLimit": false,
+    "name": "main.js",
+    "related": {},
+    "size": 0,
+    "type": "asset",
+  },
+]
+`;

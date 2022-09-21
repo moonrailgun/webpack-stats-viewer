@@ -1,0 +1,3 @@
+node_modules
+.DS_Store
+packages/webpack-plugin/src/__tests__/fixtures/stats.json

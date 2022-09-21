@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["DOM"],
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "importsNotUsedAsValues": "error",
+    "resolveJsonModule": true
+  }
+}
