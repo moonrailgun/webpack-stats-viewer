@@ -10,10 +10,14 @@ import {
   Typography,
 } from '@arco-design/web-react';
 import type { RefInputType } from '@arco-design/web-react/es/Input/interface';
-import { IconSearch } from '@arco-design/web-react/icon';
+import {
+  IconSearch,
+  IconArrowLeft,
+  IconArrowRight,
+} from '@arco-design/web-react/icon';
 import { get, groupBy, includes } from 'lodash-es';
 import filesize from 'filesize';
-import { useMemoizedFn } from 'ahooks';
+import { useMemoizedFn, useHistoryTravel } from 'ahooks';
 import Highlighter from 'react-highlight-words';
 import './Reportor.less';
 
@@ -22,9 +26,14 @@ export const Reportor: React.FC<{
 }> = React.memo((props) => {
   const inputRef = useRef<RefInputType>(null);
   const [pageSize, setPageSize] = useState(20);
-  const [filtered, setFiltered] = useState<Partial<Record<string, string[]>>>(
-    {}
-  );
+  const {
+    value: filtered = {},
+    setValue: setFiltered,
+    forward,
+    back,
+    forwardLength,
+    backLength,
+  } = useHistoryTravel<Partial<Record<string, string[]>>>({});
 
   const renderModuleIds = useMemoizedFn((col: (string | number)[]) => {
     return (
@@ -199,6 +208,21 @@ export const Reportor: React.FC<{
 
   return (
     <div>
+      <div className="p-1 flex items-center">
+        <div className="flex-1 text-lg">All Chunks</div>
+        <Space>
+          <Button
+            icon={<IconArrowLeft />}
+            disabled={backLength === 0}
+            onClick={back}
+          />
+          <Button
+            icon={<IconArrowRight />}
+            disabled={forwardLength === 0}
+            onClick={forward}
+          />
+        </Space>
+      </div>
       <Table
         rowKey="hash"
         data={data}
