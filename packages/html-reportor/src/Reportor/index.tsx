@@ -1,25 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { StatsCompilation, StatsChunk, StatsModule } from 'webpack';
+import type { StatsCompilation, StatsChunk } from 'webpack';
 import {
   Table,
   TableColumnProps,
-  Input,
   Popover,
   Button,
   Space,
   Typography,
 } from '@arco-design/web-react';
 import type { RefInputType } from '@arco-design/web-react/es/Input/interface';
-import {
-  IconSearch,
-  IconArrowLeft,
-  IconArrowRight,
-} from '@arco-design/web-react/icon';
-import { get, groupBy, includes } from 'lodash-es';
+import { IconArrowLeft, IconArrowRight } from '@arco-design/web-react/icon';
+import { groupBy } from 'lodash-es';
 import filesize from 'filesize';
 import { useMemoizedFn, useHistoryTravel } from 'ahooks';
 import Highlighter from 'react-highlight-words';
-import './Reportor.less';
+import './index.less';
+import { buildSearchFilter, getAllModules, renderArray } from './utils';
+import { ModulesList } from './components/ModulesList';
 
 export const Reportor: React.FC<{
   stats: StatsCompilation;
@@ -114,6 +111,22 @@ export const Reportor: React.FC<{
         },
       },
       {
+        title: 'siblings',
+        dataIndex: 'siblings',
+        width: 240,
+        render: (col: StatsChunk['siblings']) => {
+          return (
+            <Popover
+              trigger={['click']}
+              style={{ maxWidth: '80vw' }}
+              content={renderModuleIds(col ?? [])}
+            >
+              <Button type="text">(Length: {(col ?? []).length})</Button>
+            </Popover>
+          );
+        },
+      },
+      {
         title: 'origins',
         dataIndex: 'origins',
         width: 120,
@@ -153,19 +166,12 @@ export const Reportor: React.FC<{
             <Popover
               trigger={['click']}
               style={{ maxWidth: '80vw' }}
-              content={getAllModules(col ?? []).map((item, i) => {
-                return (
-                  <div key={i} className="whitespace-nowrap">
-                    <Highlighter
-                      searchWords={filtered['modules'] ?? []}
-                      autoEscape={true}
-                      textToHighlight={`${item.name}(${filesize(
-                        item.size ?? 0
-                      )})`}
-                    />
-                  </div>
-                );
-              })}
+              content={
+                <ModulesList
+                  col={col}
+                  searchWords={filtered['modules'] ?? []}
+                />
+              }
             >
               <Button type="text">(Click)</Button>
             </Popover>
@@ -176,11 +182,6 @@ export const Reportor: React.FC<{
             String(item.name).includes(val)
           );
         }),
-      },
-      {
-        title: 'entry',
-        dataIndex: 'entry',
-        width: 80,
       },
       {
         title: 'reason',
@@ -247,70 +248,3 @@ export const Reportor: React.FC<{
   );
 });
 Reportor.displayName = 'Reportor';
-
-function renderArray(col: any) {
-  return Array.isArray(col) ? col.join('|') : col;
-}
-
-function buildSearchFilter(
-  inputRef: React.MutableRefObject<RefInputType | null>,
-  fieldPath: string | ((chunk: StatsChunk, val: string) => boolean)
-): Pick<
-  TableColumnProps<StatsChunk>,
-  'filterIcon' | 'onFilter' | 'onFilterDropdownVisibleChange' | 'filterDropdown'
-> {
-  return {
-    filterIcon: <IconSearch />,
-    filterDropdown: ({ filterKeys, setFilterKeys, confirm }) => {
-      return (
-        <div>
-          <Input.Search
-            ref={inputRef}
-            searchButton
-            style={{ width: 240 }}
-            placeholder="Input Text"
-            allowClear={true}
-            value={filterKeys?.[0] || ''}
-            onChange={(value) => {
-              setFilterKeys?.(value ? [value] : []);
-            }}
-            onSearch={() => {
-              confirm?.();
-            }}
-            onBlur={() => {
-              confirm?.();
-            }}
-          />
-        </div>
-      );
-    },
-    onFilter: (value, row) => {
-      if (typeof fieldPath === 'function') {
-        return fieldPath(row, value);
-      }
-
-      return value ? includes(String(get(row, fieldPath)), value) : true;
-    },
-    onFilterDropdownVisibleChange: (visible) => {
-      if (visible) {
-        setTimeout(() => inputRef.current?.focus(), 150);
-      }
-    },
-  };
-}
-
-/**
- * Expand all modules
- */
-function getAllModules(modules: StatsModule[]): StatsModule[] {
-  const list: StatsModule[] = [];
-  modules.forEach((module) => {
-    if (module.modules) {
-      list.push(...module.modules);
-    } else {
-      list.push(module);
-    }
-  });
-
-  return list;
-}
