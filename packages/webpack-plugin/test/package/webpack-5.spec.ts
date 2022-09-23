@@ -1,7 +1,3 @@
-// const webpack5 = require('webpack');
-// const MemoryFS = require('memory-fs');
-// const { advanceTo } = require('jest-date-mock');
-// const { set } = require('lodash');
 import webpack5 from 'webpack';
 import MemoryFS from 'memory-fs';
 import { set } from 'lodash';

@@ -1,8 +1,8 @@
-import webpack from 'webpack';
+import webpack, { StatsOptions } from 'webpack';
 import path from 'path';
 import { merge } from 'lodash';
-import { extractData } from './extract';
 import fs from 'fs-extra';
+import normalize from 'normalize-path';
 
 const publicDir = path.resolve(__dirname, '../public');
 
@@ -10,11 +10,17 @@ const DEFAULT_OPTIONS = {
   outDir: '',
   stats: {
     assets: true,
-    chunks: true,
-    modules: true,
+    modules: false,
     hash: true,
     builtAt: true,
-  },
+    chunks: true,
+    chunkRelations: true,
+    chunkModules: true,
+    chunkOrigins: true,
+    chunkGroups: false,
+    reasons: true,
+    optimizationBailout: true,
+  } as StatsOptions,
 };
 
 const PLUGIN_NAME = 'webpack-stats-viewer';
@@ -29,9 +35,7 @@ const generateReports = async (
 ) => {
   const { outDir } = options;
 
-  // const logger = (compilation as any).getInfrastructureLogger
-  //   ? (compilation as any).getInfrastructureLogger(PLUGIN_NAME)
-  //   : console;
+  const logger = compilation.getLogger(PLUGIN_NAME);
   const source = compilation.getStats().toJson(options.stats);
 
   let html = await fs.readFile(path.resolve(publicDir, './index.html'), {
@@ -43,13 +47,21 @@ const generateReports = async (
     `<script type="module">window.stats = ${JSON.stringify(source)};</script>`
   );
   html = html.replace(/\.\/assets/g, `${path.resolve(publicDir, './assets')}`);
+  const filename = path.join(
+    outDir,
+    `webpack-stats-viewer-${source.hash ?? Date.now()}.html`
+  );
+
+  const generatedFilePath = path.resolve(
+    compilation.outputOptions.path ?? '',
+    filename
+  );
+  logger.info('Generate stats file in:', normalize(generatedFilePath));
+  logger.info('Open it with:', `file://${normalize(generatedFilePath)}`);
 
   return [
     {
-      filename: path.join(
-        outDir,
-        `webpack-stats-viewer-${source.hash ?? Date.now()}.html`
-      ),
+      filename,
       source: html,
     },
   ];
@@ -94,6 +106,7 @@ export class WebpackStatsViewerPlugin {
     }
 
     // For webpack 4
+    // TODO
     //
     // compiler.hooks.emit.tapAsync(PLUGIN_NAME, async (compilation, callback) => {
     //   const newAssets = await generateReports(compilation, options);
