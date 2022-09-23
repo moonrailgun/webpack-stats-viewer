@@ -1,16 +1,13 @@
 import webpack from 'webpack';
 import path from 'path';
-import process from 'process';
 import { merge } from 'lodash';
 import { extractData } from './extract';
+import fs from 'fs-extra';
+
+const publicDir = path.resolve(__dirname, '../public');
 
 const DEFAULT_OPTIONS = {
-  compare: true,
-  baseline: Boolean(process.env.BUNDLE_STATS_BASELINE),
-  html: true,
-  json: false,
   outDir: '',
-  silent: false,
   stats: {
     assets: true,
     chunks: true,
@@ -30,28 +27,32 @@ const generateReports = async (
   compilation: webpack.Compilation,
   options: Options
 ) => {
-  // const { compare, baseline, html, json, outDir } = options;
-  const newAssets = {};
+  const { outDir } = options;
 
-  const logger = (compilation as any).getInfrastructureLogger
-    ? (compilation as any).getInfrastructureLogger(PLUGIN_NAME)
-    : console;
+  // const logger = (compilation as any).getInfrastructureLogger
+  //   ? (compilation as any).getInfrastructureLogger(PLUGIN_NAME)
+  //   : console;
   const source = compilation.getStats().toJson(options.stats);
-  const outputPath = compilation?.options?.output?.path;
 
-  const { entrypoints, chunks } = extractData(source);
+  let html = await fs.readFile(path.resolve(publicDir, './index.html'), {
+    encoding: 'utf8',
+  });
 
-  console.table(entrypoints);
-  console.table(
-    chunks.map((chunk) => ({
-      id: chunk.id,
-      initial: chunk.initial,
-      entry: chunk.entry,
-      size: chunk.size,
-      files: (chunk.files ?? []).join(','),
-      origins: JSON.stringify(chunk.origins),
-    }))
+  html = html.replace(
+    '<!-- window.stats -->',
+    `<script type="module">window.stats = ${JSON.stringify(source)};</script>`
   );
+  html = html.replace(/\.\/assets/g, `${path.resolve(publicDir, './assets')}`);
+
+  return [
+    {
+      filename: path.join(
+        outDir,
+        `webpack-stats-viewer-${source.hash ?? Date.now()}.html`
+      ),
+      source: html,
+    },
+  ];
 };
 
 export class WebpackStatsViewerPlugin {
@@ -76,11 +77,15 @@ export class WebpackStatsViewerPlugin {
           async () => {
             const newAssets = await generateReports(compilation, options);
 
-            // Object.entries(newAssets).forEach(([filename, source]) => {
-            //   compilation.emitAsset(filename, new webpack.sources.RawSource(source), {
-            //     development: true,
-            //   });
-            // });
+            newAssets.forEach(({ filename, source }) => {
+              compilation.emitAsset(
+                filename,
+                new webpack.sources.RawSource(source),
+                {
+                  development: true,
+                }
+              );
+            });
           }
         );
       });

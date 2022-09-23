@@ -21,11 +21,13 @@
   "author": "moonrailgun <moonrailgun@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
+    "fs-extra": "^10.1.0",
     "lodash": "^4.17.0",
     "typescript": "^4.8.2",
     "webpack-stats-viewer-reportor": "workspace:^1.0.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
     "@types/jest": "^29.0.0",
     "@types/lodash": "^4.14.184",
     "@types/memory-fs": "^0.3.3",
