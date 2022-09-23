@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && cp -r ./dist/ ../webpack-plugin/public/",
+    "build": "tsc && vite build && cd ../webpack-plugin && pnpm bundle-html",
     "prepare": "pnpm build",
     "preview": "vite preview"
   },

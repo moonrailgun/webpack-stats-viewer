@@ -7,7 +7,9 @@ import type { StatsCompilation } from 'webpack';
 import { Reportor } from './Reportor';
 
 export function App() {
-  const [stats, setStats] = useState<StatsCompilation | null>(null);
+  const [stats, setStats] = useState<StatsCompilation | null>(
+    (window as any).stats ?? null
+  );
 
   const handleFiles = useMemoizedFn((_, _file: UploadItem) => {
     const file = _file.originFile;

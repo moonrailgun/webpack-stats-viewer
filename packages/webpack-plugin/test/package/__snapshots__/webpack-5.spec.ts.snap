@@ -18,7 +18,7 @@ exports[`webpack plugin package webpack5 1`] = `
       "size": 0,
     },
     "isOverSizeLimit": false,
-    "name": "ff3c1908fb7991d230b0.html",
+    "name": "webpack-stats-viewer-ff3c1908fb7991d230b0.html",
     "related": {},
     "size": 0,
     "type": "asset",

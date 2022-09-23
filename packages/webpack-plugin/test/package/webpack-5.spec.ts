@@ -18,7 +18,7 @@ describe('webpack plugin package', () => {
     expect.assertions(3);
 
     const compiler = webpack5(config);
-    // compiler.outputFileSystem = new MemoryFS();
+    compiler.outputFileSystem = new MemoryFS();
 
     compiler.run((error, stats) => {
       expect(error).toEqual(null);
