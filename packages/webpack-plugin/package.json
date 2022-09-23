@@ -4,14 +4,16 @@
   "description": "",
   "main": "lib/index.js",
   "types": "typings.d.ts",
-  "directories": {
-    "lib": "lib"
-  },
+  "files": [
+    "lib",
+    "public"
+  ],
   "engines": {
     "node": ">= 14.0"
   },
   "scripts": {
     "build": "tsc",
+    "prepare": "pnpm build",
     "lint": "../../node_modules/.bin/eslint . --ext .js",
     "test": "TZ=UTC jest src",
     "pretest-package": "cd test/package && npm init -y && npm i -D webpack4@npm:webpack@4",

@@ -1,6 +1,7 @@
-const webpack4 = require('webpack4'); // eslint-disable-line
-const MemoryFS = require('memory-fs');
-const { advanceTo } = require('jest-date-mock');
+// @ts-ignore
+import webpack4 from 'webpack4';
+import MemoryFS from 'memory-fs';
+import { advanceTo } from 'jest-date-mock';
 
 jest.mock('webpack', () => require('./node_modules/webpack4')); // eslint-disable-line
 
@@ -17,10 +18,12 @@ describe('webpack plugin package', () => {
     const compiler = webpack4(config);
     compiler.outputFileSystem = new MemoryFS();
 
-    compiler.run((error, stats) => {
+    compiler.run((error: any, stats: any) => {
       expect(error).toEqual(null);
       expect(stats.hasErrors()).toBe(false);
-      expect(stats.toJson({ source: false, assets: true }).assets).toMatchSnapshot();
+      expect(
+        stats.toJson({ source: false, assets: true }).assets
+      ).toMatchSnapshot();
       done();
     });
   });
