@@ -7,16 +7,22 @@ import {
   Button,
   Space,
   Typography,
+  Message,
 } from '@arco-design/web-react';
 import type { RefInputType } from '@arco-design/web-react/es/Input/interface';
-import { IconArrowLeft, IconArrowRight } from '@arco-design/web-react/icon';
-import { groupBy } from 'lodash-es';
+import {
+  IconArrowLeft,
+  IconArrowRight,
+  IconCodeBlock,
+  IconHome,
+} from '@arco-design/web-react/icon';
 import filesize from 'filesize';
 import { useMemoizedFn, useHistoryTravel } from 'ahooks';
 import Highlighter from 'react-highlight-words';
-import './index.less';
 import { buildSearchFilter, getAllModules, renderArray } from './utils';
 import { ModulesList } from './components/ModulesList';
+import { isEmpty } from 'lodash-es';
+import './index.less';
 
 export const Reportor: React.FC<{
   stats: StatsCompilation;
@@ -70,6 +76,10 @@ export const Reportor: React.FC<{
         dataIndex: 'files',
         width: 240,
         render: renderArray,
+        filteredValue: filtered['files'],
+        ...buildSearchFilter(inputRef, (chunk, val) => {
+          return (chunk.files ?? []).some((item) => String(item).includes(val));
+        }),
       },
       {
         title: 'size',
@@ -77,6 +87,28 @@ export const Reportor: React.FC<{
         sorter: (a, b) => a.size - b.size,
         width: 100,
         render: (col) => filesize(col),
+        defaultSortOrder: 'descend',
+        filteredValue: filtered['size'],
+        filterMultiple: false,
+        filters: [
+          {
+            text: '> 2MB',
+            value: 2 * 1024 * 1024,
+          },
+          {
+            text: '> 1MB',
+            value: 1 * 1024 * 1024,
+          },
+          {
+            text: '> 512KB',
+            value: 512 * 1024,
+          },
+          {
+            text: '> 256KB',
+            value: 256 * 1024,
+          },
+        ],
+        onFilter: (value, row) => row.size > value,
       },
       {
         title: 'parents',
@@ -203,8 +235,15 @@ export const Reportor: React.FC<{
     [props.stats.chunks]
   );
 
-  useEffect(() => {
-    console.log(groupBy(data, (item) => item.id));
+  const chunkMap = useMemo(() => {
+    const map: Record<string | number, StatsChunk> = {};
+    data.forEach((item) => {
+      if (item.id) {
+        map[item.id] = item;
+      }
+    });
+
+    return map;
   }, [data]);
 
   return (
@@ -212,6 +251,18 @@ export const Reportor: React.FC<{
       <div className="p-1 flex items-center">
         <div className="flex-1 text-lg">All Chunks</div>
         <Space>
+          <Button
+            icon={<IconCodeBlock />}
+            onClick={() => {
+              Message.info('Chunk Map has printed in devtool console');
+              console.log(chunkMap);
+            }}
+          />
+          <Button
+            icon={<IconHome />}
+            disabled={isEmpty(filtered)}
+            onClick={() => setFiltered({})}
+          />
           <Button
             icon={<IconArrowLeft />}
             disabled={backLength === 0}

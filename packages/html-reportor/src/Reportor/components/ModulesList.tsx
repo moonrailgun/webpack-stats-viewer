@@ -32,6 +32,9 @@ export const ModulesList: React.FC<{
           }
         >
           <div className="whitespace-nowrap overflow-auto">
+            <p>
+              Name: {item.name}({filesize(item.size ?? 0)})
+            </p>
             <p>IssuerName: {item.issuerName}</p>
             <p>Reasons:</p>
             <div className="pl-2 border-l-4">
