@@ -1,13 +1,20 @@
-import webpack, { StatsOptions } from 'webpack';
+import type webpack from 'webpack';
+import type { StatsOptions, WebpackPluginInstance } from 'webpack';
 import path from 'path';
-import { merge } from 'lodash';
 import fs from 'fs-extra';
-import normalize from 'normalize-path';
+import opener from 'opener';
+import chalk from 'chalk';
 
 const publicDir = path.resolve(__dirname, '../public');
 
 const DEFAULT_OPTIONS = {
   outDir: '',
+  open: true,
+  /**
+   * Modify your own filename
+   * @default `webpack-stats-viewer-${hash}.html`
+   */
+  filename: '',
   stats: {
     assets: true,
     modules: false,
@@ -25,51 +32,11 @@ const DEFAULT_OPTIONS = {
 
 const PLUGIN_NAME = 'webpack-stats-viewer';
 
-const isWebpack5 = parseInt(webpack.version, 10) === 5;
-
 type Options = typeof DEFAULT_OPTIONS;
 
-const generateReports = async (
-  compilation: webpack.Compilation,
-  options: Options
-) => {
-  const { outDir } = options;
-
-  const logger = compilation.getLogger(PLUGIN_NAME);
-  const source = compilation.getStats().toJson(options.stats);
-
-  let html = await fs.readFile(path.resolve(publicDir, './index.html'), {
-    encoding: 'utf8',
-  });
-
-  html = html.replace(
-    '<!-- window.stats -->',
-    `<script type="module">window.stats = ${JSON.stringify(source)};</script>`
-  );
-  html = html.replace(/\.\/assets/g, `${path.resolve(publicDir, './assets')}`);
-  const filename = path.join(
-    outDir,
-    `webpack-stats-viewer-${source.hash ?? Date.now()}.html`
-  );
-
-  const generatedFilePath = path.resolve(
-    compilation.outputOptions.path ?? '',
-    filename
-  );
-  logger.info('Generate stats file in:', normalize(generatedFilePath));
-  logger.info('Open it with:', `file://${normalize(generatedFilePath)}`);
-
-  return [
-    {
-      filename,
-      source: html,
-    },
-  ];
-};
-
-export class WebpackStatsViewerPlugin {
+export class WebpackStatsViewerPlugin implements WebpackPluginInstance {
   options: Options;
-  constructor(options?: Options) {
+  constructor(options?: Partial<Options>) {
     this.options = {
       ...DEFAULT_OPTIONS,
       ...options,
@@ -77,49 +44,61 @@ export class WebpackStatsViewerPlugin {
   }
 
   apply(compiler: webpack.Compiler) {
-    const options = merge({}, DEFAULT_OPTIONS, this.options);
+    const done = (stats: webpack.Stats, callback: () => void) => {
+      this.generateReport(stats).then(() => callback());
+    };
 
-    if (isWebpack5) {
-      compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-        compilation.hooks.processAssets.tapPromise(
-          {
-            name: PLUGIN_NAME,
-            stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
-          },
-          async () => {
-            const newAssets = await generateReports(compilation, options);
-
-            newAssets.forEach(({ filename, source }) => {
-              compilation.emitAsset(
-                filename,
-                new webpack.sources.RawSource(source),
-                {
-                  development: true,
-                }
-              );
-            });
-          }
-        );
-      });
-
-      return;
+    if (compiler.hooks) {
+      compiler.hooks.done.tapAsync(PLUGIN_NAME, done);
+    } else {
+      // webpack4
+      // @ts-ignore
+      compiler.plugin('done', done);
     }
+  }
 
-    // For webpack 4
-    // TODO
-    //
-    // compiler.hooks.emit.tapAsync(PLUGIN_NAME, async (compilation, callback) => {
-    //   const newAssets = await generateReports(compilation, options);
+  async generateReport(stats: webpack.Stats) {
+    const { outDir } = this.options;
+    const compilation = stats.compilation;
 
-    //   Object.entries(newAssets).forEach(([filename, source]) => {
-    //     // eslint-disable-next-line no-param-reassign
-    //     compilation.assets[filename] = {
-    //       size: () => 0,
-    //       source: () => source,
-    //     };
-    //   });
+    const logger = compilation.getLogger(PLUGIN_NAME);
+    const source = compilation.getStats().toJson(this.options.stats);
 
-    //   callback();
-    // });
+    let html = await fs.readFile(path.resolve(publicDir, './index.html'), {
+      encoding: 'utf8',
+    });
+
+    html = html.replace(
+      '<!-- window.stats -->',
+      `<script type="module">window.stats = ${JSON.stringify(source)};</script>`
+    );
+    html = html.replace(
+      /\.\/assets/g,
+      `${path.resolve(publicDir, './assets')}`
+    );
+    const filename = path.join(
+      outDir,
+      this.options.filename ||
+        `${PLUGIN_NAME}-${source.hash ?? Date.now()}.html`
+    );
+
+    const generatedFilePath = path.resolve(
+      compilation.outputOptions.path ?? '',
+      filename
+    );
+
+    await fs.ensureDir(path.dirname(generatedFilePath));
+    await fs.writeFile(generatedFilePath, html);
+
+    logger.info(
+      `${chalk.bold(PLUGIN_NAME)} saved stats file to ${chalk.bold(
+        generatedFilePath
+      )}`
+    );
+
+    if (this.options.open) {
+      const uri = `file://${generatedFilePath}`;
+      opener(uri);
+    }
   }
 }
