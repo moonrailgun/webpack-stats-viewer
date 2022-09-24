@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Upload, Button, Spin } from '@arco-design/web-react';
+import { Upload, Button, Spin, ConfigProvider } from '@arco-design/web-react';
 import { UploadItem } from '@arco-design/web-react/es/Upload/index';
 import { useMemoizedFn } from 'ahooks';
 import filesize from 'filesize';
 import type { StatsCompilation } from 'webpack';
 import { Reportor } from './Reportor';
+import enUS from '@arco-design/web-react/es/locale/en-US';
 
 export function App() {
   const [stats, setStats] = useState<StatsCompilation | null>(
@@ -37,31 +38,33 @@ export function App() {
   });
 
   return (
-    <div>
-      {stats ? (
-        <Reportor stats={stats} />
-      ) : (
-        <div className="m-auto w-8/12 text-center">
-          <div className="text-lg p-4">Upload your stats.json file</div>
-          <Button
-            className="mb-4"
-            type="text"
-            href="https://webpack.js.org/api/stats/"
-            target="_blank"
-          >
-            How to generate stats.json
-          </Button>
-          <Upload
-            directory={false}
-            limit={1}
-            drag={true}
-            renderUploadList={(fileList) =>
-              fileList.length > 0 ? <Spin dot={true} /> : null
-            }
-            onChange={handleFiles}
-          />
-        </div>
-      )}
-    </div>
+    <ConfigProvider locale={enUS}>
+      <div>
+        {stats ? (
+          <Reportor stats={stats} />
+        ) : (
+          <div className="m-auto w-8/12 text-center">
+            <div className="text-lg p-4">Upload your stats.json file</div>
+            <Button
+              className="mb-4"
+              type="text"
+              href="https://webpack.js.org/api/stats/"
+              target="_blank"
+            >
+              How to generate stats.json
+            </Button>
+            <Upload
+              directory={false}
+              limit={1}
+              drag={true}
+              renderUploadList={(fileList) =>
+                fileList.length > 0 ? <Spin dot={true} /> : null
+              }
+              onChange={handleFiles}
+            />
+          </div>
+        )}
+      </div>
+    </ConfigProvider>
   );
 }
