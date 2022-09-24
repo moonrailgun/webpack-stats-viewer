@@ -5,10 +5,12 @@
     "outDir": "lib",
     "esModuleInterop": true,
     "isolatedModules": true,
-    "module": "ESNext",
+    "declaration": true,
+    "module": "CommonJS",
     "moduleResolution": "node",
     "strict": true,
     "importsNotUsedAsValues": "error",
     "resolveJsonModule": true
-  }
+  },
+  "include": ["./src/*"]
 }

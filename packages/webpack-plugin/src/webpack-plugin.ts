@@ -69,7 +69,7 @@ const generateReports = async (
 
 export class WebpackStatsViewerPlugin {
   options: Options;
-  constructor(options: Options) {
+  constructor(options?: Options) {
     this.options = {
       ...DEFAULT_OPTIONS,
       ...options,
