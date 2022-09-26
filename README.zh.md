@@ -1,8 +1,8 @@
 # webpack-stats-viewer
 
-一个用于检查 `webpack` 统计信息的网站。
+一个用于检查 `webpack` 统计信息的工具。
 
-许多同类的 `webpack` 分析器工具可以显示摘要，但是作为开发人员，当我尝试深入研究并思考为什么将那些文件捆绑到这些块中时，这些工具让我感到无力，因为我很难看到更多的细节。所以我开发了这个工具，没有花里胡哨的魔法，作为开发者我需要的仅仅是更多的细节与。我想我需要它。
+许多同类的 `webpack` 分析器工具可以显示摘要，但是作为开发人员，当我尝试深入研究并思考为什么将那些文件捆绑到这些块中时，这些工具让我感到无力，因为我很难看到更多的细节。所以我开发了这个工具，没有花里胡哨的魔法，作为开发者我需要的仅仅是更多的细节。我想我需要它。
 
 **这是为了深入研究 webpack chunks 构成以及用于深度网站性能优化而打造的**
 
@@ -16,7 +16,7 @@
   - 记录静态报告，便于比较/存储/归档
 - 提供在线网站与 `webpack` 插件
   - 易于使用
-  
+
 ## 在 webpack 中使用
 
 ```bash
@@ -41,7 +41,7 @@ export default {
 
 [https://webpack.js.org/api/stats/](https://webpack.js.org/api/stats/)
 
-## 界面查看
+## 界面预览
 
 ![](./docs/screenshot.png)
 
@@ -50,3 +50,7 @@ export default {
 ## 使用在线版本
 
 - [Online Viewer](https://webpack-stats-viewer.moonrailgun.com/) (你应该自己生成`stats.json`)
+
+## 开源地址
+
+[https://github.com/moonrailgun/webpack-stats-viewer](https://github.com/moonrailgun/webpack-stats-viewer)
