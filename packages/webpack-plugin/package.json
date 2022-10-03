@@ -1,6 +1,6 @@
 {
   "name": "webpack-stats-viewer-plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -23,6 +23,14 @@
     "release": "npm publish --registry https://registry.npmjs.com/"
   },
   "author": "moonrailgun <moonrailgun@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moonrailgun/webpack-stats-viewer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/moonrailgun/webpack-stats-viewer/issues"
+  },
+  "homepage": "https://github.com/moonrailgun/webpack-stats-viewer#readme",
   "license": "Apache-2.0",
   "dependencies": {
     "chalk": "4.1.2",
