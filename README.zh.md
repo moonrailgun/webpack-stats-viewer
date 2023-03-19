@@ -20,7 +20,7 @@
 ## 在 webpack 中使用
 
 ```bash
-npm install webpack-stats-viewer-plugin
+npm install -D webpack-stats-viewer-plugin
 ```
 
 *webpack.config.js*:

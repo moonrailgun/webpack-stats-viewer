@@ -18,11 +18,11 @@ Many same webpack analyzer tools can show summary, but as a developer, when i tr
   - Record a static report which can read it later.
 - Website and Plugin
   - Ease to use.
-  
+
 ## Usage in webpack
 
 ```bash
-npm install webpack-stats-viewer-plugin
+npm install -D webpack-stats-viewer-plugin
 ```
 
 *webpack.config.js*:
