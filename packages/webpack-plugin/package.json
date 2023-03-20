@@ -20,7 +20,7 @@
     "test-package": "TZ=UTC jest test/package/*.spec.ts",
     "posttest-package": "cd test/package && rm -rf node_modules package.json package-lock.json",
     "bundle-html": "node ./scripts/bundle.js",
-    "prepublish": "npm run bundle-html",
+    "prepublish": "npm run bundle-html && cp ../../README.md ./README.md",
     "release": "npm publish --registry https://registry.npmjs.com/"
   },
   "author": "moonrailgun <moonrailgun@gmail.com>",
